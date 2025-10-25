@@ -45,7 +45,52 @@ void text_editor_handle_key(int keycode) {
         case KEY_F3: exit_editor(); return;
         case KEY_LEFT: if(cursor_pos>0)cursor_pos--;break;
         case KEY_RIGHT: if(cursor_pos<buffer_len)cursor_pos++;break;
-        // ... other arrow key logic is the same ...
+        case KEY_DOWN: { 
+            int current_col = 0;
+            int i = cursor_pos;
+            while (i > 0 && editor_buffer[i-1] != '\n') {
+                i--;
+                current_col++;
+            }
+
+            int next_line_pos = cursor_pos;
+            while (next_line_pos < buffer_len && editor_buffer[next_line_pos] != '\n') {
+                next_line_pos++;
+            }
+            if (next_line_pos < buffer_len) { // found end of current line
+                next_line_pos++; // move to start of next line
+                cursor_pos = next_line_pos;
+                int col_count = 0;
+                while (cursor_pos < buffer_len && editor_buffer[cursor_pos] != '\n' && col_count < current_col) {
+                    cursor_pos++;
+                    col_count++;
+                }
+            }
+            break;
+        }
+        case KEY_UP: {
+            int current_col = 0;
+            int i = cursor_pos;
+            while (i > 0 && editor_buffer[i-1] != '\n') {
+                i--;
+                current_col++;
+            }
+
+            if (i > 0) { // if not on the first line
+                int prev_line_end = i - 1;
+                int prev_line_start = prev_line_end;
+                while (prev_line_start > 0 && editor_buffer[prev_line_start-1] != '\n') {
+                    prev_line_start--;
+                }
+                cursor_pos = prev_line_start;
+                int col_count = 0;
+                while (cursor_pos < prev_line_end && col_count < current_col) {
+                    cursor_pos++;
+                    col_count++;
+                }
+            }
+            break;
+        }
         default:
             if(keycode=='\b'){
                 if(cursor_pos>0){
